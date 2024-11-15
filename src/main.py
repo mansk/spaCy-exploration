@@ -3,13 +3,15 @@ import tarfile
 
 nlp = spacy.load("en_core_web_sm")
 
-docs = []
 
-with tarfile.open("data.tar.gz", mode="r:gz") as tar_data:
+def content_gen(tar_data):
     for member in tar_data.getmembers():
         if member.isfile() and member.name.endswith(".txt"):
             file = tar_data.extractfile(member).read()
-            doc = nlp(file.decode("utf_8"))
-            docs.append(doc)
+            text = file.decode("utf_8")
 
-            print(f"{sum(1 for _ in doc.sents)} sentences found in {member.name}")
+            yield text
+
+
+with tarfile.open("data.tar.gz", mode="r:gz") as tar_data:
+    docs_gen = nlp.pipe(content_gen(tar_data), batch_size=1000)
