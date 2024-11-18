@@ -9,9 +9,13 @@ def content_gen(tar_data):
         if member.isfile() and member.name.endswith(".txt"):
             file = tar_data.extractfile(member).read()
             text = file.decode("utf_8")
+            filename = member.name.split("/")[-1]
 
-            yield text
+            yield (text, {"filename": filename})
 
 
 with tarfile.open("data.tar.gz", mode="r:gz") as tar_data:
-    docs_gen = nlp.pipe(content_gen(tar_data), batch_size=1000)
+    docs_gen = nlp.pipe(content_gen(tar_data), as_tuples=True)
+
+    for doc, context in docs_gen:
+        print(f"File: {context["filename"]}")
