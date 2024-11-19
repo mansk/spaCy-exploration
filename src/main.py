@@ -10,12 +10,13 @@ def content_gen(tar_data):
             file = tar_data.extractfile(member).read()
             text = file.decode("utf_8")
             filename = member.name.split("/")[-1]
+            president, speech_number = filename.rstrip(".txt").split("_speeches_")
 
-            yield (text, {"filename": filename})
+            yield (text, {"president": president, "speech_number": int(speech_number)})
 
 
 with tarfile.open("data.tar.gz", mode="r:gz") as tar_data:
     docs_gen = nlp.pipe(content_gen(tar_data), as_tuples=True)
 
     for doc, context in docs_gen:
-        print(f"File: {context["filename"]}")
+        print(f"President: {context["president"]}, Speech: {context["speech_number"]}")
